@@ -24,7 +24,6 @@ jobs:
       # 下载依赖、打包项目
       - name: Install and Build
         run: |
-          npm run install
           npm run build
 
       # 部署到服务器
