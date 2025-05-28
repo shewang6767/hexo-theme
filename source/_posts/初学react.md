@@ -8,7 +8,7 @@ tags:
 
 # React介绍
 
-由Meta公司（facebook）研发，是一个用于    构建Web（网页）    和   原生交互界面 （ios或者Android）    的库
+由Meta公司（facebook）研发，是一个用于    构建Web（网页）    和   原生交互界面 （ios或者Android）    的js库
 
 ### React优势（流行）
 
