@@ -7,7 +7,7 @@ on:
 jobs:
   build-and-deploy:
     # 构建环境使用 ubuntu
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       # 官方action, 将代码拉取到虚拟机
       - name: Checkout
@@ -28,8 +28,8 @@ jobs:
           npm run build
 
       # 部署到服务器
-      - name: Upload to Deploy Server
-        uses: appleboy/scp-action@master
+      - name: Upload to Deploy Server 
+        uses: actions/hexo-theme@main
         with:
           # 服务器域名
           host: ${{ secrets.SERVER_HOST }}
