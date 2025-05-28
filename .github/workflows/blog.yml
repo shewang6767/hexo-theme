@@ -40,6 +40,7 @@ jobs:
           WIN_PASS: ${{ secrets.WIN_PASSWORD }}   # 密码
           TARGET_DIR: 'C:\www\myapp'              # 目标目录
         with:
+          azPSVersion: 'latest'
           inlineScript: |
             $securePass = ConvertTo-SecureString $env:WIN_PASS -AsPlainText -Force
             $cred = New-Object System.Management.Automation.PSCredential ($env:WIN_USER, $securePass)
