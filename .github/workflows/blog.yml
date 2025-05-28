@@ -27,23 +27,36 @@ jobs:
           npm install
           npm run build
 
-      # 部署到服务器
-      - name: Upload to Deploy Server 
-        uses: appleboy/scp-action@master
+      - name: Compress files
+        shell: pwsh
+        run: |
+          Compress-Archive -Path ./dist/* -DestinationPath ./deploy.zip
+
+      - name: Upload via WinRM
+        uses: azure/powershell@v1
+        env:
+          WIN_HOST: ${{ secrets.WIN_HOST }}       # 服务器 IP 或域名
+          WIN_USER: ${{ secrets.WIN_USER }}       # 用户名（如 github-deploy）
+          WIN_PASS: ${{ secrets.WIN_PASSWORD }}   # 密码
+          TARGET_DIR: 'C:\www\myapp'              # 目标目录
         with:
-          # 服务器域名
-          host: ${{ secrets.SERVER_HOST }}
-          # 服务器用户名
-          username: ${{ secrets.SERVER_USERNAME }}
-          # 服务器密码
-          password: ${{ secrets.SERVER_PASSWORD }}
-          # 服务器端口
-          port: ${{ secrets.SERVER_PORT }}
-          # 指定上传的文件目录(项目配置的打包目录名称)
-          source: './public/*'
-          # 指定上传服务器目录
-          target: '/var/www/movie'
-          # 解压时覆盖现有文件
-          overwrite: true
-          # 删除指定数量的前导路径元素
-          strip_components: 1
+          inlineScript: |
+            $securePass = ConvertTo-SecureString $env:WIN_PASS -AsPlainText -Force
+            $cred = New-Object System.Management.Automation.PSCredential ($env:WIN_USER, $securePass)
+            
+            # 创建远程会话
+            $session = New-PSSession -ComputerName $env:WIN_HOST -Credential $cred -UseSSL -SessionOption (New-PSSessionOption -SkipCACheck)
+
+            # 上传并解压文件
+            Copy-Item -Path ./deploy.zip -Destination "$env:TARGET_DIR\" -ToSession $session
+            Invoke-Command -Session $session -ScriptBlock {
+              Expand-Archive -Path "$using:TARGET_DIR\deploy.zip" -DestinationPath $using:TARGET_DIR -Force
+            }
+
+            # 执行清理或重启命令（示例）
+            Invoke-Command -Session $session -ScriptBlock {
+              Remove-Item -Path "$using:TARGET_DIR\deploy.zip" -Force
+              # iisreset /restart  # 如需重启 IIS
+            }
+
+            Remove-PSSession $session
