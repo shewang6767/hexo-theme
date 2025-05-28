@@ -30,7 +30,7 @@ jobs:
       - name: Compress files
         shell: pwsh
         run: |
-          Compress-Archive -Path ./dist/* -DestinationPath ./deploy.zip
+          Compress-Archive -Path ./public/* -DestinationPath ./deploy.zip
 
       - name: Upload via WinRM
         uses: azure/powershell@v1
